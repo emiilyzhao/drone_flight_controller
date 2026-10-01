@@ -1,31 +1,8 @@
-# Cortex
-
-A professional-grade ESP32-S3 flight controller for DIY quadcopter drones, featuring real-time attitude stabilization, DShot ESC control, and wireless command reception. This project pairs with [Synapse](https://github.com/sergiovirahonda/synapse), the transmitter controller that sends flight commands via joystick.
+ESP32-S3 flight controller for DIY quadcopter drones, featuring real-time attitude stabilization, DShot ESC control, and wireless command reception.
 
 ## Overview
 
-Cortex is the flight control system (FC) for your DIY drone project. It receives wireless commands from the Synapse transmitter, processes sensor data from an MPU6050 gyroscope/accelerometer, and uses PID control algorithms to stabilize the drone while executing flight maneuvers. The controller runs on an ESP32-S3 microcontroller and communicates with a 4-in-1 ESC via native DShot protocol.
-
-**📖 Tuning reference:** For a complete guide to all parameters (pins, PID, throttle bands, yaw hold, altitude hold, trim, feature flags)—with typical ranges and when to tweak—see **[TUNING.md](TUNING.md)**.
-
-## Features
-
-* 🚁 **Real-time Stabilization**: PD controllers for roll/pitch; yaw PI + rate feedforward (stage 3 only) for snappy stick response
-* ⚡ **Native DShot ESC Control**: Direct hardware-level DShot600 protocol via ESP32 RMT
-* 📡 **Wireless Communication**: nRF24L01 radio module for low-latency command reception
-* 🎯 **MPU6050 Integration**: Hardware DLPF filtering and software calibration for accurate attitude sensing
-* 📺 **OLED Telemetry Display**: Real-time flight data on the drone (attitude, throttle, motor outputs, trims)
-* 📤 **Radio Telemetry Downlink**: Sends throttle, roll, pitch, and altitude-hold state (7-byte packet) to the transmitter via nRF24 ACK payload (for Synapse display)
-* 📊 **INA219 Current/Voltage**: Bus voltage, current draw, and power (mW) on the avionics I2C bus; 32V/2A calibration for 3S LiPo; readings in `AvionicsMetrics`
-* 🌡️ **Barometer (BMP280)**: Pressure and altitude on the avionics I2C bus; read on **Core 0** (avionics task) to avoid I2C contention with the flight loop; data available via `getAvionicsMetrics()`
-* 💾 **Blackbox Logging**: Flight data (attitude, command, motors, avionics) written to microSD via **SD_MMC** (1-bit mode); queue-based cross-core design (Core 1 enqueues frames, Core 0 task drains and writes); incremental log file naming
-* 📐 **Altitude Hold**: LiDAR + accelerometer fusion for vertical state; PID hold with engage (1) / no-op (0) / disengage (-1) from transmitter; failsafe auto-disengages; configurable min/max engage altitude and LiDAR valid range
-* 🧭 **Heading Lock (Yaw Hold)**: When yaw stick is centered, lock heading using fused compass + gyro (70/30); stick moved = rate control. Compass health check falls back to gyro-only if sensor is unhealthy.
-* 🔒 **Safety Features**: Arming sequence, throttle limits, and hardware initialization checks
-* 🧵 **Dual-Core Design**: Flight loop on core 1 (~1 kHz, no radio I/O); radio task on core 0 at 1000 Hz (receive + telemetry under mutex); avionics task on core 0 at 100 Hz (LIDAR, GPS, compass, barometer, INA219) with cross-core mutex for thread-safe reads; blackbox task on core 0 drains a queue and writes to SD_MMC (no SD I/O from flight loop).
-* 📏 **Optional Avionics**: TF-Luna LIDAR, GPS (UART), and compass (I2C) supported; adapters are null-safe so sensors can be omitted per build
-* 🏗️ **Clean Architecture**: Modular design with adapters, models, controllers, and tasks
-* ⚙️ **PlatformIO Integration**: Modern build system with dependency management
+Flight control system (FC) for DIY drone project. It receives wireless commands from the Synapse transmitter, processes sensor data from an MPU6050 gyroscope/accelerometer, and uses PID control algorithms to stabilize the drone while executing flight maneuvers. The controller runs on an ESP32-S3 microcontroller and communicates with a 4-in-1 ESC.
 
 ## Hardware Requirements
 
@@ -356,8 +333,6 @@ The flight controller performs an automatic arming sequence on startup:
    * Motors spin at low idle speed (200 DShot units)
    * Drone is ready to receive commands
 
-**⚠️ WARNING**: Keep clear of propellers during arming sequence!
-
 ### Flight Operation
 
 1. **Power on** the drone (3S LiPo battery)
@@ -458,32 +433,5 @@ pio device monitor
 * **Yaw lock via compass**: Hold heading using compass heading when engaged.
 * **Position lock**: Altitude lock (current) plus geo position lock (hold latitude/longitude using GPS).
 * **Auto-landing**: Automated descent and landing sequence.
-
-## Related Projects
-
-* **[Synapse](https://github.com/sergiovirahonda/synapse)**: The transmitter controller that sends commands to Cortex
-
-## Safety Disclaimer
-
-⚠️ **WARNING**: This is experimental software for DIY drones. Always:
-
-* Test in a safe, open area away from people and property
-* Wear safety glasses when testing
-* Start with low throttle and gradually increase
-* Keep hands and body clear of propellers at all times
-* Ensure proper battery handling and charging safety
-* Follow local regulations regarding drone operation
-
-The authors are not responsible for any damage or injury resulting from the use of this software.
-
-## License
-
-This project is open source. See repository for license details.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
----
 
 **Built with ❤️ for the DIY drone community**
